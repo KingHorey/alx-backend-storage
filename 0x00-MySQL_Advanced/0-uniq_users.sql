@@ -1,0 +1,11 @@
+-- SCRIPT TO CREATE users table and run on any DB
+
+CREATE TABLE IF NOT EXISTS users (
+	id INT NOT NULL AUTO_INCREMENT,
+	email VARCHAT(255) NOT NULL UNIQUE,
+	name VARCHAR(255),
+
+	PRIMARY KEY(id),
+
+)
+
