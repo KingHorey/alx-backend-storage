@@ -6,7 +6,7 @@
 """
 import redis
 from uuid import uuid4
-from typing import Any, Union
+from typing import Any, Union, Callable, Optional
 import json
 
 
@@ -26,3 +26,13 @@ class Cache:
         else:
             self._redis.set(key, json.dumps(data))
         return key
+
+    def get(self, key: str, fn: Optional[Callable]) -> Any:
+        """ get data from redis """
+        key: Any = self._redis.get(key)
+        if fn:
+           return fn(key)
+        elif isinstance(key, bytes):
+            return key.decode('utf-8')
+
+
