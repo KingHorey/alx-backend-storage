@@ -46,15 +46,3 @@ class Cache:
         return self.get(key, fn=int)
 
 
-cache = Cache()
-
-TEST_CASES = {
-    b"foo": int,
-    123: str,
-    "bar": lambda d: d.decode("utf-8")
-}
-
-for value, fn in TEST_CASES.items():
-    key = cache.store(value)
-    assert cache.get(key, fn) == value
-
