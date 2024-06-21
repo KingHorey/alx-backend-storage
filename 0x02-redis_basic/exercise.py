@@ -21,5 +21,8 @@ class Cache:
     def store(self, data: Union[str, bytes, int, float]) -> str:
         """ store data in redis """
         key = str(uuid4())
-        self._redis.set(key, json.dumps(data))
+        if (isinstance(data, bytes) or isinstance(data, str)):
+            self._redis.set(key, data)
+        else:
+            self._redis.set(key, json.dumps(data))
         return key
