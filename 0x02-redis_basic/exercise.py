@@ -33,44 +33,17 @@ class Cache:
         if data is None:
             return None
         elif fn:
-            return fn(data)
+                try:
+                    return fn(data)
+                except Exception as e:
+                    return e
         else:
             return data
 
     def get_str(self, key: str) -> Union[str, None]:
         """ get string data from redis """
-        if key is None:
-            return None
-        else:
-            key = self._redis.get(key)
-            if key is None:
-                return None
-            else:
-                return str(key)
+        return self.get(key, fn=str)
 
     def get_int(self, key: str) -> Union[int, None]:
-        """ get string data from redis """
-        if key is None:
-            return None
-        else:
-            key = self._redis.get(key)
-            if key is None:
-                return None
-            else:
-                return int(key)
-
-
-
-cache = Cache()
-
-TEST_CASES = {
-    b"foo": None,
-    123: int,
-    "bar": lambda d: d.decode("utf-8")
-}
-
-for value, fn in TEST_CASES.items():
-    key = cache.store(value)
-    print(key)
-    assert cache.get(key, fn=fn) == value
-
+        """ call self.get with right params """
+        return self.get(key, fn=int)
