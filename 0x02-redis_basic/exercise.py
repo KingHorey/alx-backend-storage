@@ -27,7 +27,7 @@ def count_calls(method: Callable) -> Callable:
 def call_history(method: Callable) -> Callable:
     """ update the history of calls """
     @wraps(method)
-    def update_logs(self, *args, **kwargs):
+    def update_logs(self, *args, **kwargs) -> Any:
         input: str = method.__qualname__ + ':inputs'
         output: Any = method.__qualname__ + ':outputs'
         result = method(self, args) # return value of the method, the key
@@ -36,6 +36,28 @@ def call_history(method: Callable) -> Callable:
         self._redis.rpush(input, str(args))
         return result
     return update_logs
+
+def replay(method: Callable) -> None:
+    """ replay the history of calls """
+    method_name: str = method.__qualname__
+    # get the number of times the method was called
+    count: Any = method.__self__._redis.get(method_name)
+    count = count.decode('utf-8')
+    if count:
+        count = int(count)
+        print(f"{method_name} was called {count} times:")
+        # get the inputs and outputs
+        inputs = method.__self__._redis.lrange(f"{method_name}:inputs", 0, -1)
+        outputs = method.__self__._redis.lrange(f"{method_name}:outputs", 0, -1)
+        # convert the inputs and outputs to utf-8 strings
+        inputs = [i.decode('utf-8') for i in inputs]
+        outputs = [o.decode('utf-8') for o in outputs]
+        # zip the inputs and outputs
+        zipped = zip(inputs, outputs)
+        # print the inputs and outputs
+        for i, o in zipped:
+            print(f"{method_name}(*{i}) -> {o}")
+
 
 class Cache:
     """ class to create a redis instance and cache data
