@@ -37,17 +37,10 @@ class Cache:
         else:
             return data
 
-    def get_str(self, key: str) -> str:
+    def get_str(self, key: str) -> Union[str, None]:
         """ get string data from redis """
-        data = self._redis.get(key)
-        if data is None:
-            return None
-        return data.decode("utf-8")
+        return self.get(key, fn=str)
 
-    def get_int(self, key: str) -> int:
-        """ get int data from redis """
-        data = self._redis.get(key)
-        if data is None:
-            return None
-        return int(data)
-
+    def get_int(self, key: str) -> Union[int, None]:
+        """ call self.get with right params """
+        return self.get(key, fn=int)
