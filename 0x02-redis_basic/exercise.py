@@ -15,7 +15,8 @@ def count_calls(method: Callable) -> Callable:
     """ decorator to count the number of times a function is called """
     @wraps(method)
     def method_wrapper(self, key: str) -> Any:
-        """ method to be called, self is passed because it is an instance method """
+        """ method to be called, self is passed because it is an instance
+        method """
         check: Any = self._redis.get(method.__qualname__)
         if check:
             self._redis.incr(method.__qualname__)
@@ -24,18 +25,20 @@ def count_calls(method: Callable) -> Callable:
         return method(self, key)
     return method_wrapper
 
+
 def call_history(method: Callable) -> Callable:
     """ update the history of calls """
     @wraps(method)
     def update_logs(self, *args, **kwargs) -> Any:
         input: str = method.__qualname__ + ':inputs'
         output: Any = method.__qualname__ + ':outputs'
-        result = method(self, args) # return value of the method, the key
+        result = method(self, args)  # return value of the method, the key
         self._redis.rpush(output, result)
         value: Any = self._redis.get(result)
         self._redis.rpush(input, str(args))
         return result
     return update_logs
+
 
 def replay(method: Callable) -> None:
     """ replay the history of calls """
@@ -48,7 +51,8 @@ def replay(method: Callable) -> None:
         print(f"{method_name} was called {count} times:")
         # get the inputs and outputs
         inputs = method.__self__._redis.lrange(f"{method_name}:inputs", 0, -1)
-        outputs = method.__self__._redis.lrange(f"{method_name}:outputs", 0, -1)
+        outputs = method.__self__._redis.lrange(f"{method_name}:outputs", 0,
+                                                -1)
         # convert the inputs and outputs to utf-8 strings
         inputs = [i.decode('utf-8') for i in inputs]
         outputs = [o.decode('utf-8') for o in outputs]
@@ -93,6 +97,3 @@ class Cache:
     def get_int(self, key: str) -> Union[int, None]:
         """ call self.get with right params """
         return self.get(key, fn=int)
-
-
-
