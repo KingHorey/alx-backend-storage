@@ -27,7 +27,7 @@ class Cache:
             self._redis.set(key, json.dumps(data))
         return key
 
-    def get(self, key: str, fn: Optional[Callable]) -> Any:
+    def get(self, key: str, fn: Callable[[Any], Any] = None) -> Any:
         """ get data from redis """
         data = self._redis.get(key)
         if data is None:
@@ -47,3 +47,4 @@ class Cache:
     def get_int(self, key: str) -> Union[int, None]:
         """ call self.get with right params """
         return self.get(key, fn=int)
+
