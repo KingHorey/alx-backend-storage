@@ -1,0 +1,5 @@
+{
+	"code-runner.executorMap": {
+		"python": "mypy $fileName && python $fileName && pycodestyle $fileName",
+	}
+}
