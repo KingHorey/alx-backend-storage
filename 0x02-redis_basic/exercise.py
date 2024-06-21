@@ -8,6 +8,23 @@ import redis
 from uuid import uuid4
 from typing import Any, Union, Callable, Optional
 import json
+from functools import wraps
+
+
+def count_calls(method: Callable) -> Callable:
+    """ decorator to count the number of times a function is called """
+    @wraps(method)
+    def method_wrapper(self, key: str) -> Any:
+        """ method to be called, self is passed because it is an instance method """
+        check: Any = self._redis.get(method.__qualname__)
+        if check:
+            self._redis.incr(method.__qualname__)
+        else:
+            self._redis.set(method.__qualname__, 1)
+        return method(self, key)
+    return method_wrapper
+
+
 
 
 class Cache:
@@ -18,6 +35,7 @@ class Cache:
         self._redis = redis.Redis()
         self._redis.flushdb()
 
+    @count_calls
     def store(self, data: Union[str, bytes, int, float]) -> str:
         """ store data in redis """
         key = str(uuid4())
@@ -27,7 +45,7 @@ class Cache:
             self._redis.set(key, json.dumps(data))
         return key
 
-    def get(self, key: str, fn: Optional[Callable]) -> Any:
+    def get(self, key: str, fn: Optional[Callable] = None) -> Any:
         """ get data from redis """
         data = self._redis.get(key)
         if fn:
