@@ -29,10 +29,25 @@ class Cache:
 
     def get(self, key: str, fn: Optional[Callable]) -> Any:
         """ get data from redis """
-        key: Any = self._redis.get(key)
-        if fn:
-           return fn(key)
-        elif isinstance(key, bytes):
-            return key.decode('utf-8')
+        data = self._redis.get(key)
+        if data is None:
+            return None
+        elif fn:
+            return fn(data)
+        else:
+            return data
 
+    def get_str(self, key: str) -> str:
+        """ get string data from redis """
+        data = self._redis.get(key)
+        if data is None:
+            return None
+        return data.decode("utf-8")
+
+    def get_int(self, key: str) -> int:
+        """ get int data from redis """
+        data = self._redis.get(key)
+        if data is None:
+            return None
+        return int(data)
 
